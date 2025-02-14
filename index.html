@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calcule su impuesto sobre la renta</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7f9;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            /*align-items: center;*/
+            align-items: center; /* Alinea el contenido en la parte superior */
+            height: 100vh;
+            margin: 0;
+            overflow-y: auto; /* Permite hacer scroll en toda la página si es necesario */
+        }
+
+        .wrapper {
+            display: flex;
+            width: 900px; /* Aumentamos el ancho total del wrapper */
+            max-width: 95%; /* Para que no se desborde en pantallas pequeñas */
+        }
+
+        .sidebar {
+            width: 180px; /* Ajustamos el ancho de la barra lateral */
+            background: #164554;
+            padding: 20px;
+            border-radius: 10px 0 0 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar button {
+            display: block;
+            background: none;
+            color: white;
+            border: none;
+            padding: 10px;
+            text-align: center;
+            width: 100%;
+            cursor: pointer;
+            font-size: 16px;
+            margin-bottom: 5px;
+            transition: background 0.3s;
+        }
+
+        .sidebar button:hover, .sidebar button.active {
+            background: #0e2f39;
+            font-weight: bold;
+        }
+
+        .container {
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 0 10px 10px 0;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: left;
+            
+            width: 100%;
+            max-width: 720px; /* Aumentamos el ancho del container */
+            max-height: 80vh; /* Limita la altura del contenedor al 80% de la pantalla */
+            overflow-y: auto; /* Habilita el scroll vertical cuando el contenido es grande */
+        }
+                
+
+        h2 {
+            color: #164554;
+            text-align: center;
+        }
+
+        input {
+            width: 100%; /* En lugar de ocupar casi todo el contenedor, ahora solo ocupa el 70% */
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+
+        button.calculate {
+            background-color: #164554;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background 0.3s;
+
+        }
+
+        button.calculate:hover {
+            background-color: #0e2f39;
+        }
+        .button-wrapper {
+            text-align: center;
+            margin-top: 20px; /* Ajusta según sea necesario */
+        }
+
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #164554;
+            color: white;
+        }
+
+        .resultado {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e8f4f8;
+            border-radius: 5px;
+            text-align: left;
+        }
+
+        /* Estilo del combo box */
+        select {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+            color: #333;
+            box-sizing: border-box;
+        }
+
+        /* Estilo de las opciones dentro del select */
+        option {
+            padding: 10px;
+            background-color: #fff;
+            color: #333;
+        }
+
+        /* Cuando el combo box está enfocado */
+        select:focus {
+            border-color: #0056b3;
+            outline: none;
+            background-color: #e6f7ff;
+        }
+
+        /* Estilo del label para el select */
+        label {
+            font-size: 14px;
+            color: #555;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="sidebar">
+            <button class="tab-btn active" onclick="changeTab('tab1', event)">Trabajador Independiente</button>
+            <button class="tab-btn" onclick="changeTab('tab2', event)">Trabajador Asalariado</button>
+            <button class="tab-btn" onclick="changeTab('tab3', event)">Empresa</button>
+            <button class="tab-btn" onclick="changeTab('tab4', event)">Capital inmobiliario</button>
+            <button class="tab-btn" onclick="changeTab('tab5', event)">Capital mobiliario</button>
+            <button class="tab-btn" onclick="changeTab('tab6', event)">Ganancia de Capital</button>
+            <button class="tab-btn" onclick="changeTab('tab7', event)">Remesas</button>
+        </div>
+
+        <div class="container">
+            <h2 id="titulo">Calcule su impuesto sobre la renta como Trabajador Independiente</h2>
+
+            <div id="standardInputs">
+                <label for="ingreso">Ingresos: ₡</label>
+                <input type="text" oninput="formatNumber(event)" id="ingreso">
+                <label for="gastos">Gastos: ₡</label>
+                <input type="number" oninput="formatNumber(event)" id="gastos">
+            </div>
+
+            <div id="salarioInput" style="display: none;">
+                <label for="salario">Salario: ₡</label>
+                <input type="number" oninput="formatNumber(event)" id="salario">
+            </div>
+
+            <div id="capitalInput" style="display: none;">
+                <label for="ingresoCapital">Ingreso Capital: ₡</label>
+                <input type="number" oninput="formatNumber(event)" id="ingresoCapital">
+            </div>
+            
+            <div id="capitalGanancia" style="display: none;">
+                <label for="adquisicion">Valor de adquisición: ₡</label>
+                <input type="number" oninput="formatNumber(event)" id="adquisicion">
+                <label for="venta">Precio de venta: ₡</label>
+                <input type="number" oninput="formatNumber(event)" id="venta">
+            </div>
+
+            <div id="remesasInput" style="display: none;">
+                <label for="tipoServicio">Tipo de Servicio:</label>
+                <select id="tipoServicio">
+                    <option value="seleccione">Seleccione el tipo de Servicio </option>
+                    <option value="transporte">Transporte y Comunicaciones -> 8.50% </option>
+                    <option value="pensiones">Pensiones, Jubulaciones, Salarios -> 10.00%</option>
+                    <option value="remuneracion">Remuneración por Trabajo Personal en Relación de Dependencia -> 10.00%</option>
+                    <option value="honorarios">Honorarios, Comisiones, Regalías, Dietas y Prestación de Servicios sin Relación de Dependencia -> 25.00%</option>
+                    <option value="reaseguros">Reaseguros y Primas de Seguro -> 5.50%</option>
+                    <option value="cine">Uso de Películas para Cine o TV, Discos e Imágenes -> 20.00%</option>
+                    <option value="radionovelas">Radionovelas y Telenovelas -> 50.00%</option>
+                    <option value="utilidades">Utilidades y Dividendos -> 15.00%</option>
+                    <option value="intereses">Intereses, Comisiones, y Otros Gastos Financieros -> 5.50%</option>
+                    <option value="espectaculos">Pago por Espectáculos Públicos en el País -> 15.00%</option>
+                    <option value="otra">Cualquier Otra Remesa -> 30.00%</option>
+                </select>
+                <label for="montoRemesa">Monto a pagar al proveedor del exterior: $</label>
+                <input type="number" id="montoRemesa">
+            </div>
+
+            <div class="button-wrapper">
+                <button class="calculate" onclick="calcular()">Calcular</button>
+            </div>
+            
+           <!-- <button class="calculate" onclick="calcular()">Calcular</button> --> 
+            <div id="resultado" class="resultado"></div>
+        </div>
+    </div>
+
+    <script>
+
+        function changeTab(tab, event) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');  // Se asegura de marcar la pestaña activa
+
+            let titulo = document.getElementById("titulo");
+            let standardInputs = document.getElementById("standardInputs");
+            let salarioInput = document.getElementById("salarioInput");
+            let capitalInput = document.getElementById("capitalInput");
+            let capitalGanancia = document.getElementById("capitalGanancia");
+            let remesasInput = document.getElementById("remesasInput");
+            
+            // Limpiar los campos de entrada
+            document.querySelectorAll("input").forEach(input => input.value = "");
+            document.getElementById("resultado").innerHTML = "";
+
+            switch (tab) {
+                case "tab1":
+                    titulo.innerText = "Calcule su impuesto sobre la renta como Trabajador Independiente";
+                    standardInputs.style.display = "block";
+                    salarioInput.style.display = "none";
+                    capitalInput.style.display = "none";
+                    capitalGanancia.style.display = "none";
+                    remesasInput.style.display = "none";
+                    break;
+                case "tab2":
+                    titulo.innerText = "Calcule su impuesto como Trabajador Asalariado";
+                    standardInputs.style.display = "none";
+                    salarioInput.style.display = "block";
+                    capitalInput.style.display = "none";
+                    capitalGanancia.style.display = "none";
+                    remesasInput.style.display = "none";
+                    break;
+                case "tab3":
+                    titulo.innerText = "Calcule su impuesto para Empresas";
+                    standardInputs.style.display = "block";
+                    salarioInput.style.display = "none";
+                    capitalInput.style.display = "none";
+                    capitalGanancia.style.display = "none";
+                    remesasInput.style.display = "none";
+                    break;
+                case "tab4":
+                    titulo.innerText = "Calcule su impuesto sobre renta de capital inmobiliario";
+                    standardInputs.style.display = "none";
+                    salarioInput.style.display = "none";
+                    capitalInput.style.display = "block";
+                    capitalGanancia.style.display = "none";
+                    remesasInput.style.display = "none";
+                    break;
+                case "tab5":
+                    titulo.innerText = "Calcule su impuesto sobre capital mobiliario";
+                    standardInputs.style.display = "none";
+                    salarioInput.style.display = "none";
+                    capitalInput.style.display = "block";
+                    capitalGanancia.style.display = "none";
+                    remesasInput.style.display = "none";
+                    break;
+                case "tab6":
+                    titulo.innerText = "Calcule su impuesto sobre Ganancias de Capital";
+                    standardInputs.style.display = "none";
+                    salarioInput.style.display = "none";
+                    capitalInput.style.display = "none";
+                    capitalGanancia.style.display = "block";
+                    remesasInput.style.display = "none";
+                    break;
+                case "tab7":
+                    titulo.innerText = "Calcule su impuesto sobre Remesas";
+                    standardInputs.style.display = "none";
+                    salarioInput.style.display = "none";
+                    capitalInput.style.display = "none";
+                    capitalGanancia.style.display = "none";
+                    remesasInput.style.display = "block";
+                    break;
+                default:
+                    titulo.innerText = "Calcule su impuesto sobre la renta";
+                    standardInputs.style.display = "block";
+                    salarioInput.style.display = "none";
+                    capitalInput.style.display = "none";
+                    break;
+            }
+        }
+
+        function calcular() {
+            let resultadoHTML = "";
+            let ingreso = parseFloat(document.getElementById("ingreso")?.value) || 0;
+            let gastos = parseFloat(document.getElementById("gastos")?.value) || 0;
+            let salario = parseFloat(document.getElementById("salario")?.value) || 0;
+            let adquisicion = parseFloat(document.getElementById("adquisicion")?.value) || 0;
+            let venta = parseFloat(document.getElementById("venta")?.value) || 0;
+            let montoRemesa = parseFloat(document.getElementById("montoRemesa")?.value) || 0;
+            let tipoServicio = document.getElementById("tipoServicio").value;
+
+            // Obtiene el input de ingresoCapital correctamente
+            let ingresoCapitalInput = document.getElementById("ingresoCapital");
+            let ingresoCapital = ingresoCapitalInput ? parseFloat(ingresoCapitalInput.value) || 0 : 0;
+
+            let activeTab = document.querySelector(".tab-btn.active").innerText;
+
+            if (activeTab === "Trabajador Independiente") {
+                resultadoHTML = calcularIndependiente(ingreso, gastos);
+            } else if (activeTab === "Trabajador Asalariado") {
+                resultadoHTML = calcularAsalariado(salario);
+            } else if (activeTab === "Empresa") {
+                resultadoHTML = calcularEmpresa(ingreso, gastos);
+            } else if (activeTab === "Capital inmobiliario") {
+                resultadoHTML = calcularCapitalInmobiliario(ingresoCapital);
+            } else if (activeTab === "Capital mobiliario") {
+                resultadoHTML = calcularCapitalMobiliario(ingresoCapital);
+            } else if (activeTab === "Ganancia de Capital") {
+                resultadoHTML = calcularGananciaCapital(adquisicion, venta);
+            } else if (activeTab === "Remesas") {
+                let porcentaje = 0;
+                if (tipoServicio === "seleccione") porcentaje = 0;
+                else if (tipoServicio === "transporte") porcentaje = 0.085;
+                else if (tipoServicio === "pensiones") porcentaje = 0.1;
+                else if (tipoServicio === "remuneracion") porcentaje = 0.1;
+                else if (tipoServicio === "honorarios") porcentaje = 0.25;
+                else if (tipoServicio === "reaseguros") porcentaje = 0.055;
+                else if (tipoServicio === "cine") porcentaje = 0.2;
+                else if (tipoServicio === "radionovelas") porcentaje = 0.5;
+                else if (tipoServicio === "utilidades") porcentaje = 0.15;
+                else if (tipoServicio === "intereses") porcentaje = 0.055;
+                else if (tipoServicio === "espectaculos") porcentaje = 0.15;
+                else if (tipoServicio === "otra") porcentaje = 0.3;
+
+                let impuesto = montoRemesa * porcentaje;
+                
+                let disclaimer = `<p><strong></strong></p>
+                      <ul>
+                          <li>La tarifa del impuesto es desde 5.5% al 50%.</li>
+                          <li>El impuesto debe cancelarse mensualmente sobre los pagos que se efectúen al exterior por prestación de servicios o adquisición de bienes intangibles.</li>
+                          <li>El impuesto debe pagarse en colones al tipo de cambio de venta del Banco Central de Costa Rica al día de su pago.</li>
+                          <li>Si el impuesto no es retenido, el contribuyente se expone a la reclasificación del gasto y al pago del impuesto no retenido más multas e intereses.</li>
+                          <li>Costa Rica tiene firmados tratados para evitar la doble imposición con: Alemania, España, México y Emiratos Árabes Unidos.</li>
+                          <li>El porcentaje que aplica es el indicado en cada tratado.</li>
+                          <li><strong>Fuente:</strong> Ley del Impuesto sobre la Renta, artículos 52 a 59.</li>
+                      </ul>`;
+
+                resultadoHTML =`
+                <p>Se aplicó un porcentaje de: <strong>${(porcentaje * 100).toFixed(2)}%</strong>.</p>
+                <p>El impuesto sobre la remesa es: <strong>$${impuesto.toLocaleString('es-CR')}</strong></p>
+                ${disclaimer}`;
+            }
+
+            document.getElementById("resultado").innerHTML = resultadoHTML;
+        }
+
+        //FORMULAS
+        function calcularIndependiente(ingreso, gastos) {
+            let ingresoNeto = ingreso - gastos;
+            let impuestoTotal = 0;
+            let tablaHTML = `<h3>Ingreso Neto: ₡${ingresoNeto.toLocaleString('es-CR')}</h3>
+                            <table>
+                                <tr><th>Tramo</th><th>Cálculo</th><th>Impuesto</th></tr>`;
+            const tramos = [
+                { limite: 4094000, tasa: 0, label: "Exento" },
+                { limite: 6115000, tasa: 0.10, label: "10%" },
+                { limite: 10200000, tasa: 0.15, label: "15%" },
+                { limite: 20442000, tasa: 0.20, label: "20%" },
+                { limite: Infinity, tasa: 0.25, label: "25%" }
+            ];
+            let tramoInicio = 0;
+            for (let tramo of tramos) {
+                if (ingresoNeto > tramoInicio) {
+                    let tramoAplicable = Math.min(ingresoNeto, tramo.limite) - tramoInicio;
+                    let impuestoTramo = tramoAplicable * tramo.tasa;
+                    impuestoTotal += impuestoTramo;
+                    tablaHTML += `<tr><td>${tramo.label}</td>
+                                  <td>(${tramoAplicable.toLocaleString('es-CR')}) × ${tramo.tasa * 100}%</td>
+                                  <td>₡${impuestoTramo.toLocaleString('es-CR')}</td></tr>`;
+                    tramoInicio = tramo.limite;
+                }
+            }
+            // Agregar disclaimer al final
+            let disclaimer = `<p><strong></strong></p>
+                            <ul>
+                                <li>La tarifa del impuesto es desde 0% a 25%.</li>
+                                <li>El impuesto debe pagarse en colones al tipo de cambio de venta del Banco Central de Costa Rica al día de su pago.</li>
+                                <li>Fuente: Ley del Impuesto sobre la Renta, artículo 15, inciso c).</li>
+                            </ul>`;
+
+            return tablaHTML + `</table><h3>Total Impuesto: <strong>₡${impuestoTotal.toLocaleString('es-CR')}</strong></h3>` + disclaimer;
+        }
+
+        function calcularAsalariado(salario) {
+            let impuestoTotal = 0;
+            let tablaHTML = `<h3>Salario Bruto: ₡${salario.toLocaleString('es-CR')}</h3>
+                            <table>
+                                <tr><th>Tramo</th><th>Cálculo</th><th>Impuesto</th></tr>`;
+
+            const tramos = [
+                { limite: 941000, tasa: 0, label: "Exento" },
+                { limite: 1381000, tasa: 0.10, label: "10%" },
+                { limite: 2422000, tasa: 0.15, label: "15%" },
+                { limite: 4685000, tasa: 0.20, label: "20%" },
+                { limite: Infinity, tasa: 0.25, label: "25%" }
+            ];
+            let tramoInicio = 0;
+            for (let tramo of tramos) {
+                if (salario > tramoInicio) {
+                    let tramoAplicable = Math.min(salario, tramo.limite) - tramoInicio;
+                    let impuestoTramo = tramoAplicable * tramo.tasa;
+                    impuestoTotal += impuestoTramo;
+                    tablaHTML += `<tr><td>${tramo.label}</td>
+                                <td>(${tramoAplicable.toLocaleString('es-CR')}) × ${tramo.tasa * 100}%</td>
+                                <td>₡${impuestoTramo.toLocaleString('es-CR')}</td></tr>`;
+                }
+                tramoInicio = tramo.limite;
+            }
+
+            // Agregar disclaimer al final
+            let disclaimer = `<p><strong></strong></p>
+                            <ul>
+                                <li>La tarifa del impuesto es desde 0% a 25%.</li>
+                                <li>El impuesto debe pagarse en colones al tipo de cambio de venta del Banco Central de Costa Rica al día de su pago.</li>
+                                <li>Fuente: Ley del Impuesto sobre la Renta, artículo 33.</li>
+                            </ul>`;
+
+            return tablaHTML + `</table><h3>Total de impuesto a pagar: ₡${impuestoTotal.toLocaleString('es-CR')}</h3>` + disclaimer;
+        }
+
+        function calcularEmpresa(ingreso, gastos) {
+            let ingresoNeto = ingreso - gastos;
+            let impuestoTotal = 0;
+            let tablaHTML = `<h3>Ingreso Neto: ₡${ingresoNeto.toLocaleString('es-CR')}</h3>
+                            <table>
+                                <tr><th>Tramo</th><th>Cálculo</th><th>Impuesto</th></tr>`;
+
+            // Si el ingreso es mayor o igual a 119,629,001, se aplica 30% a todo el ingreso
+            if (ingreso >= 119629001) {
+                ingreso = ingreso * 0.30;
+                tablaHTML += `<tr><td>30%</td>
+                            <td>(${ingreso.toLocaleString('es-CR')}) × 30%</td>
+                            <td>₡${ingreso.toLocaleString('es-CR')}</td></tr>`;
+            } else {
+                // Tramos para ingresos menores o iguales a 119,629,000
+                const tramos = [
+                    { limite: 5642000, tasa: 0.05, label: "5%" },
+                    { limite: 8465000, tasa: 0.10, label: "10%" },
+                    { limite: 11286000, tasa: 0.15, label: "15%" },
+                    { limite: 119629000, tasa: 0.20, label: "20%" },
+                ];
+
+                let tramoInicio = 0;
+                for (let tramo of tramos) {
+                    if (ingresoNeto > tramoInicio) {
+                        let tramoAplicable = Math.min(ingresoNeto, tramo.limite) - tramoInicio;
+                        let impuestoTramo = tramoAplicable * tramo.tasa;
+                        impuestoTotal += impuestoTramo;
+                        tablaHTML += `<tr><td>${tramo.label}</td>
+                                    <td>(${tramoAplicable.toLocaleString('es-CR')}) × ${tramo.tasa * 100}%</td>
+                                    <td>₡${impuestoTramo.toLocaleString('es-CR')}</td></tr>`;
+                        tramoInicio = tramo.limite;
+                    }
+                }
+            }
+            let disclaimer = `<p><strong></strong></p>
+                            <ul>
+                                <li>La tarifa del impuesto es desde 5% a 30%.</li>
+                                <li>El impuesto debe pagarse en colones al tipo de cambio de venta del Banco Central de Costa Rica al día de su pago.</li>
+                                <li>Fuente: Ley del Impuesto sobre la Renta, artículo 15, incisos a) y b).</li>
+                                <li>Si el ingreso es mayor a 119 629 000 la tarifa del impuesto sobre la renta neta es del 30%.</li>
+                            </ul>`;
+            return tablaHTML + `</table><h3>Total Impuesto: <strong>₡${ingreso.toLocaleString('es-CR')}</strong></h3>`+ disclaimer;
+        }
+
+        function calcularCapitalInmobiliario(ingreso) {
+            if (ingreso) {
+                let impuesto = ingreso * 0.1275; // Porcentaje de impuesto (ejemplo 12.75%)
+
+                let disclaimer = `<p><strong></strong></p>
+                            <ul>
+                                <li>La tarifa del impuesto es de 12,75%.</li>
+                                <li>El impuesto debe pagarse en colones al tipo de cambio de venta del Banco Central de Costa Rica al día de su pago.</li>
+                                <li>Fuente: Ley del Impuesto sobre la Renta, artículos 27 ter y 29. </li>
+                            </ul>`;
+                return `<h3>El impuesto sobre renta inmobiliaria es: ₡${impuesto.toLocaleString('es-CR')}<h3>`+ disclaimer;
+            } else {
+                return `<h3>Por favor, ingrese el valor del ingreso de capital inmobiliario.</h3>`;
+            }
+        }
+
+        function calcularCapitalMobiliario(ingreso) {
+            if (ingreso) {
+                let impuesto = ingreso * 0.15; // Tasa de impuesto de ejemplo (15%)
+
+                let disclaimer = `<p><strong></strong></p>
+                            <ul>
+                                <li>La tarifa del impuesto es de 15%.</li>
+                                <li>El impuesto debe pagarse en colones al tipo de cambio de venta del Banco Central de Costa Rica al día de su pago.</li>
+                                <li>Fuente: Ley del Impuesto sobre la Renta, artículos 27 ter, 29 bis y 31 ter.</li>
+                            </ul>`;
+                return `<h3>El impuesto sobre renta mobiliaria es: ₡${impuesto.toLocaleString('es-CR')}<h3>`+ disclaimer;
+            } else {
+                return `<h3>Por favor, ingrese el valor del ingreso de capital mobiliario.</h3>`;
+            }
+        }
+
+        function calcularGananciaCapital(adquisicion, venta) {
+            if (adquisicion && venta) {
+                let ganancia = venta - adquisicion;
+                let impuestoGanancia = 0; // Inicializamos en 0
+                let impuestoGanancia2 = adquisicion * 0.0225; // Tasa adicional de 2.25%
+
+                // Si la ganancia es negativa, asignamos "Pérdida" y el impuesto del 15% como 0
+                if (ganancia < 0) {
+                    impuestoGanancia = 0;
+                    return `
+                        <h3>Pérdida: ₡-${Math.abs(ganancia).toLocaleString('es-CR')}</h3>
+                        <h4>Impuesto a pagar (2.25% sobre adquisición): ₡${impuestoGanancia2.toLocaleString('es-CR')}</h4>
+                        <h4>Impuesto a pagar (15% sobre ganancia): ₡${impuestoGanancia.toLocaleString('es-CR')}</h4>
+                        <p>*La tarifa de 2.25% sobre el valor de adquisición aplica si el activo fue adquirido con anterioridad a julio 2019.</p>
+                    ` + `
+                    <p><strong></strong></p>
+                    <ul>
+                        <li>La tarifa de 2,25% sobre el valor de adquisición aplica si el activo fue adquirido con anterioridad a julio 2019.</li>
+                        <li>La tarifa del 15% se calcula sobre el resultado de la resta del valor de venta menos el valor de adquisición.</li>
+                        <li>El impuesto debe pagarse en colones al tipo de cambio de venta del Banco Central de Costa Rica al día de su pago.</li>
+                        <li>Fuente: Ley del Impuesto sobre la Renta, artículo 27 ter, 30, 30 bis, 31, 31 bis, y 31 ter. </li>
+                    </ul>`;
+                } else {
+                    // Si la ganancia es positiva, calculamos el impuesto del 15%
+                    impuestoGanancia = ganancia * 0.15;
+                    return `
+                        <h3>Ganancia: ₡${ganancia.toLocaleString('es-CR')}</h3>
+                        <h4>Impuesto a pagar (2.25% sobre adquisición): ₡${impuestoGanancia2.toLocaleString('es-CR')}</h4>
+                        <h4>Impuesto a pagar (15% sobre ganancia): ₡${impuestoGanancia.toLocaleString('es-CR')}</h4>
+                        <p>*La tarifa de 2.25% sobre el valor de adquisición aplica si el activo fue adquirido con anterioridad a julio 2019.</p>
+                    ` + `
+                    <p><strong></strong></p>
+                    <ul>
+                        <li>La tarifa de 2,25% sobre el valor de adquisición aplica si el activo fue adquirido con anterioridad a julio 2019.</li>
+                        <li>La tarifa del 15% se calcula sobre el resultado de la resta del valor de venta menos el valor de adquisición.</li>
+                        <li>El impuesto debe pagarse en colones al tipo de cambio de venta del Banco Central de Costa Rica al día de su pago.</li>
+                        <li>Fuente: Ley del Impuesto sobre la Renta, artículo 27 ter, 30, 30 bis, 31, 31 bis, y 31 ter. </li>
+                    </ul>`;
+                }
+            } else {
+                return `<h3>Por favor, ingrese los valores de adquisición y venta.</h3>`;
+            }
+        }
+
+
+        function calcularRemesa() {
+            let tipoServicio = document.getElementById("tipoServicio").value;
+            let monto = parseFloat(document.getElementById("monto").value) || 0;
+            let porcentajeRetencion = 0;
+
+            // Determinar el porcentaje según el tipo de servicio
+            switch (tipoServicio) {
+                case "Seleccione":
+                    porcentajeRetencion = 0;
+                    break;
+                case "transporte":
+                    porcentajeRetencion = 0.085; // 
+                    break; 
+                case "pensiones":
+                    porcentajeRetencion = 0.1; // 
+                    break;
+                case "remuneracion":
+                    porcentajeRetencion = 0.1; // 
+                    break;
+                case "honorarios":
+                    porcentajeRetencion = 0.25; // 
+                    break;
+                case "reaseguros":
+                    porcentajeRetencion = 0.055; // 
+                    break;
+                case "cine":
+                    porcentajeRetencion = 0.2; // 
+                    break;
+                case "radionovelas":
+                    porcentajeRetencion = 0.5; // 
+                    break;
+                case "utilidades":
+                    porcentajeRetencion = 0.15; // 
+                    break;
+                case "intereses":
+                    porcentajeRetencion = 0.055; // 
+                    break;
+                case "espectaculos":
+                    porcentajeRetencion = 0.15; 
+                    break;
+                case "otra":
+                    porcentajeRetencion = 0.3; 
+                    break;
+
+                default:
+                    porcentajeRetencion = 0;
+            }
+
+            let retencion = monto * porcentajeRetencion;
+
+        }
+
+    </script>
+</body>
+</html>
+    
