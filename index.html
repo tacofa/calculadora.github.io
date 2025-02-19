@@ -420,10 +420,10 @@
                                 <tr><th>Tramo</th><th>Cálculo</th><th>Impuesto</th></tr>`;
 
             const tramos = [
-                { limite: 941000, tasa: 0, label: "Exento" },
-                { limite: 1381000, tasa: 0.10, label: "10%" },
-                { limite: 2422000, tasa: 0.15, label: "15%" },
-                { limite: 4685000, tasa: 0.20, label: "20%" },
+                { limite: 922000, tasa: 0, label: "Exento" },
+                { limite: 1352000, tasa: 0.10, label: "10%" },
+                { limite: 2373000, tasa: 0.15, label: "15%" },
+                { limite: 4745000, tasa: 0.20, label: "20%" },
                 { limite: Infinity, tasa: 0.25, label: "25%" }
             ];
             let tramoInicio = 0;
@@ -457,14 +457,15 @@
                             <table>
                                 <tr><th>Tramo</th><th>Cálculo</th><th>Impuesto</th></tr>`;
 
-            // Si el ingreso es mayor o igual a 119,629,001, se aplica 30% a todo el ingreso
-            if (ingreso >= 119629001) {
-                ingreso = ingreso * 0.30;
+            // Si el ingreso neto es mayor o igual a 119,629,001, se aplica 30% a todo el ingreso neto
+            if (ingresoNeto >= 119629001) {
+                let impuestoTramo = ingresoNeto * 0.30;
+                impuestoTotal = impuestoTramo;
                 tablaHTML += `<tr><td>30%</td>
-                            <td>(${ingreso.toLocaleString('es-CR')}) × 30%</td>
-                            <td>₡${ingreso.toLocaleString('es-CR')}</td></tr>`;
+                            <td>(${ingresoNeto.toLocaleString('es-CR')}) × 30%</td>
+                            <td>₡${impuestoTramo.toLocaleString('es-CR')}</td></tr>`;
             } else {
-                // Tramos para ingresos menores o iguales a 119,629,000
+                // Tramos para ingresos netos menores o iguales a 119,629,000
                 const tramos = [
                     { limite: 5642000, tasa: 0.05, label: "5%" },
                     { limite: 8465000, tasa: 0.10, label: "10%" },
@@ -485,14 +486,16 @@
                     }
                 }
             }
+
             let disclaimer = `<p><strong></strong></p>
                             <ul>
                                 <li>La tarifa del impuesto es desde 5% a 30%.</li>
                                 <li>El impuesto debe pagarse en colones al tipo de cambio de venta del Banco Central de Costa Rica al día de su pago.</li>
                                 <li>Fuente: Ley del Impuesto sobre la Renta, artículo 15, incisos a) y b).</li>
-                                <li>Si el ingreso es mayor a 119 629 000 la tarifa del impuesto sobre la renta neta es del 30%.</li>
+                                <li>Si el ingreso neto es mayor a 119 629 000 la tarifa del impuesto sobre la renta neta es del 30%.</li>
                             </ul>`;
-            return tablaHTML + `</table><h3>Total Impuesto: <strong>₡${ingreso.toLocaleString('es-CR')}</strong></h3>`+ disclaimer;
+
+            return tablaHTML + `</table><h3>Total Impuesto: <strong>₡${impuestoTotal.toLocaleString('es-CR')}</strong></h3>` + disclaimer;
         }
 
         function calcularCapitalInmobiliario(ingreso) {
