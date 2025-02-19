@@ -457,20 +457,19 @@
                             <table>
                                 <tr><th>Tramo</th><th>Cálculo</th><th>Impuesto</th></tr>`;
 
-            // Si el ingreso neto es mayor o igual a 119,629,001, se aplica 30% a todo el ingreso neto
-            if (ingresoNeto >= 119629001) {
-                let impuestoTramo = ingresoNeto * 0.30;
-                impuestoTotal = impuestoTramo;
+            // Si el ingreso neto es mayor o igual a 119,629,000, se aplica 30% a todo el ingreso neto
+            if (ingreso >= 119629000) {
+                impuestoTotal = ingresoNeto * 0.30;
                 tablaHTML += `<tr><td>30%</td>
                             <td>(${ingresoNeto.toLocaleString('es-CR')}) × 30%</td>
-                            <td>₡${impuestoTramo.toLocaleString('es-CR')}</td></tr>`;
+                            <td>₡${impuestoTotal.toLocaleString('es-CR')}</td></tr>`;
             } else {
-                // Tramos para ingresos netos menores o iguales a 119,629,000
+                // Tramos para ingresos netos menores a 119,629,000
                 const tramos = [
                     { limite: 5642000, tasa: 0.05, label: "5%" },
                     { limite: 8465000, tasa: 0.10, label: "10%" },
                     { limite: 11286000, tasa: 0.15, label: "15%" },
-                    { limite: 119629000, tasa: 0.20, label: "20%" },
+                    { limite: 119628999, tasa: 0.20, label: "20%" },
                 ];
 
                 let tramoInicio = 0;
@@ -497,7 +496,6 @@
 
             return tablaHTML + `</table><h3>Total Impuesto: <strong>₡${impuestoTotal.toLocaleString('es-CR')}</strong></h3>` + disclaimer;
         }
-
         function calcularCapitalInmobiliario(ingreso) {
             if (ingreso) {
                 let impuesto = ingreso * 0.1275; // Porcentaje de impuesto (ejemplo 12.75%)
